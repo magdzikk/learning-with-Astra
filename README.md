@@ -33,7 +33,12 @@ CREATE TABLE IF NOT EXISTS comments_by_video (
 Show us your own tables - for the data model of your choice.
 
 ```
-Update with your own table
+create table if not exists moods_by_name ( 
+    name text, 
+    time timeuuid, 
+    mood int, 
+    primary key ((name), time, mood) 
+  ) with clustering order by (time desc, mood desc) ;
 ```
 
 ## Insert some data ##
