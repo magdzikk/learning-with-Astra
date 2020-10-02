@@ -4,114 +4,123 @@ If you have attended recently our workshops here, we ask you to create your own 
 
 ## Explain your use case ##
 
-Pick an example application that you could see on Astra and describe the entities and queries for it. 
-
-Include diagrams, screenshots etc to make it more interesting and better convey your ideas.
+An application which tracks the user's mood in time. E.g. every day the application asks the user how they day was, and they answer in a range of one to five. Later on, we might want to see what the user's average is, which days were the best, and so on.
 
 ## Create your own tables on Astra ##
 
-Example tables that we used in the workshop:
+My table:
 
 ```
-CREATE TABLE IF NOT EXISTS comments_by_user (
-    userid uuid,
-    commentid timeuuid,
-    videoid uuid,
-    comment text,
-    PRIMARY KEY ((userid), commentid)
-) WITH CLUSTERING ORDER BY (commentid DESC);
-
-CREATE TABLE IF NOT EXISTS comments_by_video (
-    videoid   uuid,
-    commentid timeuuid,
-    userid    uuid,
-    comment   text,
-    PRIMARY KEY ((videoid), commentid)
-) WITH CLUSTERING ORDER BY (commentid DESC);
-```
-
-Show us your own tables - for the data model of your choice.
-
-```
-create table if not exists moods_by_name ( 
-    name text, 
-    time timeuuid, 
-    mood int, 
-    primary key ((name), time, mood) 
-  ) with clustering order by (time desc, mood desc) ;
+create table moods_by_user ( 
+  name text, 
+  time timeuuid, 
+  mood int, 
+  primary key ((name), time)) 
+  with clustering order by (time desc);
 ```
 
 ## Insert some data ##
 
-Here some example data that we used in the workshop:
+My inserts:
 
 ```
-INSERT INTO comments_by_user (userid, commentid, videoid, comment)
-VALUES (11111111-1111-1111-1111-111111111111, NOW(), 12345678-1234-1111-1111-111111111111, 'I keep watching this video');
-
-INSERT INTO comments_by_user (userid, commentid, videoid, comment)
-VALUES (11111111-1111-1111-1111-111111111111, NOW(), 12345678-1234-1111-1111-111111111111, 'Soo many comments for the same video');
+insert into moods_by_user (name, time, mood) values ('Sue', now(), 5);
+insert into moods_by_user (name, time, mood) values ('Sue', now(), 3);
+insert into moods_by_user (name, time, mood) values ('Megan', now(), 3);
+insert into moods_by_user (name, time, mood) values ('Sue', now(), 1);
+insert into moods_by_user (name, time, mood) values ('Megan', now(), 5);
 ```
 
-Show off your own data inserts, into your own tables:
+The output:
 
 ```
-Your data goes here
-```
-
-Now show the output, for example:
-
-```
-SELECT * FROM <your table>;
+select * from moods_by_user;
+...
+ name  | time                                 | mood
+-------+--------------------------------------+------
+   Sue | 21a99de0-04e8-11eb-ab1d-91ce55467f2a |    1
+   Sue | 1b63c820-04e8-11eb-ab1d-91ce55467f2a |    3
+   Sue | 18be71b0-04e8-11eb-ab1d-91ce55467f2a |    5
+ Megan | 23ec61f0-04e8-11eb-ab1d-91ce55467f2a |    5
+ Megan | 1fc24040-04e8-11eb-ab1d-91ce55467f2a |    3
 ...
 ...
-...
 ```
-
-Include some screenshots!
 
 ## Experiment with CRUD and show the outputs: ##
 
-Examples from the workshop:
+Update (say, a user changed their mind):
 
 ```
-UPDATE comments_by_video 
-SET comment = 'This is fun!' 
-WHERE videoid = 12345678-1234-1111-1111-111111111111 AND commentid = 494a3f00-e966-11ea-84bf-83e48ffdc8ac;
+update moods_by_user set mood = 5 where name = 'Sue' and time = 21a99de0-04e8-11eb-ab1d-91ce55467f2a;
 
-SELECT * FROM comments_by_video;
+SELECT * FROM moods_by_user;
+
+ name  | time                                 | mood
+-------+--------------------------------------+------
+   Sue | 21a99de0-04e8-11eb-ab1d-91ce55467f2a |    5
+   Sue | 1b63c820-04e8-11eb-ab1d-91ce55467f2a |    3
+   Sue | 18be71b0-04e8-11eb-ab1d-91ce55467f2a |    5
+ Megan | 23ec61f0-04e8-11eb-ab1d-91ce55467f2a |    5
+ Megan | 1fc24040-04e8-11eb-ab1d-91ce55467f2a |    3
 ```
 
+Delete (the user decided they don't want to share their mood that day):
 ```
-DELETE FROM comments_by_video 
-WHERE videoid = 12345678-1234-1111-1111-111111111111 AND commentid = 494a3f00-e966-11ea-84bf-83e48ffdc8ac;
+delete from moods_by_user where name = 'Sue' and time = 1b63c820-04e8-11eb-ab1d-91ce55467f2a;
 
-SELECT * FROM comments_by_video;
-```
+SELECT * FROM moods_by_user;
 
-Show us something similar with your own tables.
-
-Try something different:
-
-Check out the CQL reference and try commands that we did not use in the workshop:
-
-https://docs.datastax.com/en/cql-oss/3.3/cql/cql_reference/cqlReferenceTOC.html
-
-Let us know what you find:
-
-```
-Update with your own examples
+ name  | time                                 | mood
+-------+--------------------------------------+------
+   Sue | 21a99de0-04e8-11eb-ab1d-91ce55467f2a |    5
+   Sue | 18be71b0-04e8-11eb-ab1d-91ce55467f2a |    5
+ Megan | 23ec61f0-04e8-11eb-ab1d-91ce55467f2a |    5
+ Megan | 1fc24040-04e8-11eb-ab1d-91ce55467f2a |    3
 ```
 
-Or connect, read and write to your Astra database via other methods.
-
-Tell us how you do it, we would love to know. 
+Other commands:
 
 ```
-Show your connection code
+// seeing how the mood changes in time
+select * from moods_by_user where name = 'Megan' order by time;
+
+ name  | time                                 | mood
+-------+--------------------------------------+------
+ Megan | 1fc24040-04e8-11eb-ab1d-91ce55467f2a |    3
+ Megan | 23ec61f0-04e8-11eb-ab1d-91ce55467f2a |    5
+ Megan | 13b1c2c0-04e9-11eb-ab1d-91ce55467f2a |    4
+ 
+ 
+ //displaying the timeuuid in a user-readable format
+ select name, toDate(time), mood from moods_by_user;
+
+ name  | system.todate(time) | mood
+-------+---------------------+------
+   Sue |          2020-10-02 |    5
+   Sue |          2020-10-02 |    5
+  John |          2020-10-02 |    4
+ Alice |          2020-10-02 |    3
+ Megan |          2020-10-02 |    4
+ Megan |          2020-10-02 |    5
+ Megan |          2020-10-02 |    3
+ 
+ //getting average mood for user
+ select name, avg(mood) from moods_by_user where name = 'Megan';
+
+ name  | system.avg(mood)
+-------+------------------
+ Megan |                4
+
+//it turns out avg(int) = int, so I need to cast to double to make it more meaningful
+KVUser@cqlsh:killrvideo> select name, avg(cast(mood as double)) from moods_by_user where name = 'Sue';
+
+ name | system.avg(cast(mood as double))
+------+----------------------------------
+  Sue |                          4.33333
+  
 ```
 
-The starry sky is the limit: Build your own app with Astra and show it off for a chance to have it included with our Sample Galleries
 
 
 
