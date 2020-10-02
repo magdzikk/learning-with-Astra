@@ -121,6 +121,6 @@ KVUser@cqlsh:killrvideo> select name, avg(cast(mood as double)) from moods_by_us
   
 ```
 
-
+Thanks DataStax Academy team for the workshop, and for the challenge to make the queries my own during this exercise :)
 
 
